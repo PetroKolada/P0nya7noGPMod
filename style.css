@@ -1,0 +1,598 @@
+*:not(.screen:has(.draw) *){
+    color: white !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.screen{
+    border: none !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    margin-left: 0px !important;
+    margin-top: 0px !important;
+    top: 0px !important;
+    left: 0px !important;
+}
+
+.center:not(.jsx-83c337f44c9d610){
+    height: 100% !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    gap: 25px !important;
+}
+
+.center > *{
+    height: 100% !important;
+}
+
+.lobby{
+    height: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+#__next{
+    background-image: none;
+    background-color: #191919 !important;
+}
+
+.active{
+    background-color: unset !important;
+    border: 3px solid rgb(117, 117, 230) !important;
+}
+
+.user{
+    width: 100% !important;
+    background-color: #323232 !important;
+    border-radius: 0px !important;
+    margin: 0px !important;
+    margin-bottom: 5px;
+    border: 1px rgba(255, 255, 255, 0.5) dashed !important;
+}
+
+.user > *{
+    background-color: #323232 !important;
+}
+
+.user *{
+    color: white !important;
+}
+
+.users {
+    width: 100% !important;
+}
+
+.left{
+    width: 100% !important;
+    background-color: unset !important;
+}
+
+.data{
+    background-color: #323232 !important;
+}
+
+.back{
+    display: none !important;
+}
+
+.players{
+    width: 100% !important;
+}
+
+.user.jsx-7347205:first-child{
+    margin-top:0px !important;
+}
+
+.scrollElements{
+    gap: 5px;
+}
+
+select{
+    background-color: #2f2f2f !important;
+    border: 1px rgba(255, 255, 255, 0.5) solid !important;
+    border-radius: 8px !important;
+}
+
+.select{
+    border: none !important;
+}
+
+.left .users{
+    align-items: baseline !important;
+}
+
+.game{
+    border-radius: 0px !important;
+    background-color: #2f2f2f !important;
+    border: 1px rgba(255, 255, 255, 0.5) dashed !important;
+}
+
+.checked{
+    background-color: unset !important;
+    border: 3px solid rgb(117, 117, 230) !important;
+    box-shadow: none !important;
+}
+
+button{
+    box-shadow: none !important;
+    border-radius: 100px !important;
+    border: 2px solid white !important;
+    background-color: #323232 !important;
+    padding: 5px !important;
+}
+
+.settings{
+    flex: none !important;
+}
+
+.watermark{
+    background-image: none !important;
+}
+
+.scrapbook{
+    width: 100% !important;
+}
+
+.list{
+    width: 100% !important;
+    height: unset !important;
+    border-radius: unset !important;
+}
+
+.timeline{
+    background-color: #323232 !important;
+    border: 1px rgba(255, 255, 255, 0.5) dashed !important;
+    border-radius: unset !important;
+}
+
+.balloon.jsx-d889a1c61adf7b0c:after{
+    content: unset !important;
+}
+
+.balloon{
+    border-radius: unset !important;
+    background-color: #323232 !important;
+    border: 3px #191919 solid !important;
+}
+
+.content{
+    background-color: unset !important;
+}
+
+.core{
+    border-radius: unset !important;
+    box-shadow: unset !important;
+    min-height: 424px !important;
+    max-width: 758px !important;
+    margin: unset !important;
+}
+
+.book.jsx-a516bc832356093b:before {
+    content: none !important;
+}
+
+.book{
+    box-shadow: none !important;
+    background-color: unset !important;
+    width: unset !important;
+    height: unset !important;
+}
+
+.logo{
+    display: none !important;
+}
+
+.header{
+    box-shadow: none !important;
+    border: none !important;
+    background-color: unset !important;
+}
+
+.drawingContainer canvas{
+    width: 758px !important;
+    height: 424px !important;
+}
+
+.drawingContainer{
+    height: 424px !important;
+    width: 758px !important;
+    position: fixed !important;
+    top: 25%;
+    left: 25%;
+    transform-origin: 0 0;
+}
+
+.bottom{
+    height: unset !important;
+    width: unset !important;
+}
+
+.screen{
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: unset !important;
+    width: 100% !important;
+}
+
+.PMCenter_panel{
+    height: 100%;
+    width: 100%;
+}
+
+.draw{
+    height: 100% !important;
+    width: 100% !important;
+    background-color: #191919 !important;
+    overflow: hidden;
+}
+
+.PMRight_panel{
+    background-color: #262626 !important;
+    height: 100%;
+    min-width: 360px;
+    width: min-content;
+    padding: 1px;
+    padding-top: 10px;
+    color: #d1d1d1 !important;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    border: 1px solid #212121;
+    display: flex;
+    gap: 1px;
+    flex-direction: column;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+.PMPanel{
+    border: 1px solid #212121;
+    width: 100%;
+    box-sizing: border-box !important;
+}
+
+.PMPanel_header{
+    display: flex;
+    width: 100%;
+}
+
+.PMPTitle:not(.PMPanel__active){
+    color: #878787 !important;
+    cursor: pointer;
+}
+
+.PMPTitle:not(.PMPanel__active):hover{
+    background-color: #292929;
+}
+
+.PMPanel__active{
+    color: #d1d1d1 !important;
+    background-color: #323232;
+}
+
+.PMPTitle{
+    width: fit-content;
+    padding: 10px;
+    border-right: 1px solid #212121;
+    font-weight: 600 !important;
+}
+
+.PMPanel_main_holder{
+    padding: 10px;
+    background-color: #323232;
+}
+
+.PMFast__color{
+    height: 25px;
+    width: 25px;
+    background-color: rgb(255, 0, 0);
+    box-shadow: inset 0px 0px 0px 1px rgb(255, 255, 255);
+    border: 1px solid rgb(0, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+
+.PMFast_color_holder{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.PMPanel:last-child{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.PMPanel:last-child .PMPanel_main_holder{
+    height: 100%;
+}
+
+.PMHeader{
+    z-index: 1000;
+    background-color: #292929;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.PMFooter{
+    z-index: 1000;
+    background-color: #292929;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    gap: 35px;
+    color: #a0a0a0 !important;
+    justify-content: space-between;
+}
+
+.PMCenter_panel{
+    display: flex;
+    flex-direction: column;
+}
+
+.PMPanel_inside{
+    height: 100%;
+    display: flex;
+}
+
+.PMPanel_tools{
+    z-index: 1000;
+    background-color: #323232;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-right: #222222 3px solid;
+}
+
+.PMCenter_panel{
+    color: #d1d1d1;
+    font-size: 12px;
+}
+
+.PMHeader_element{
+    padding: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.PMHeader_links:first-child .PMHeader_element:not(.PMHeader_element:first-child):hover{
+    box-sizing: border-box;
+    background-color: #202020;
+    box-shadow: inset 0px 0px 0px 1px #87878775;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.PMHeader_links{
+    display: flex;
+    gap: 35px;
+}
+
+.PMTool *{
+    height: 16px;
+    width: 16px;
+    filter: invert(98%) sepia(0%) saturate(1%) hue-rotate(202deg) brightness(93%) contrast(84%);
+}
+
+.PMTool{
+    box-sizing: content-box;
+    height: 16px;
+    width: 16px;
+    padding: 5px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.PMTool__active{
+    background-color: #191919;
+    box-shadow: inset 0px 0px 0px 1px #3f3f3f;
+    border-radius: 3px;
+}
+
+.PMTool:hover{
+    background-color: #1d1d1d;
+    box-shadow: inset 0px 0px 0px 1px #3f3f3f;
+    border-radius: 3px;
+}
+
+.PMPanel_hero{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.PMLayer_holder{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.PMLayer_holder_footer{
+    width: 100%;
+    background-color: #262626;
+    margin-top: 2px;
+    border-top: #212121 1px solid;
+    font-size: 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.PMLayer_button{
+    box-sizing: content-box;
+    height: 15px;
+    width: 15px;
+    padding: 5px;
+}
+
+.PMLayer_button:hover{
+    background-color: #323232;
+    box-shadow: inset 0px 0px 0px 1px #3f3f3f;
+}
+
+.PMLayer_button *{
+    height: 15px;
+    width: 15px;
+}
+
+svg{
+    fill: #dadada;
+}
+
+.PMLayer{
+    display: flex;
+    width: 100%;
+    padding: 3px;
+    gap: 15px;
+    align-items: center;
+    background-color: #262626;
+    border-bottom: #212121 1px solid;
+}
+
+.PMLayer__title{
+    background-color: unset;
+    border: unset;
+    font-size: 11px;
+    color: #a0a0a0 !important;
+}
+
+.PMPalette{
+    width: 250px;
+    aspect-ratio: 1/1;
+    border: 1px solid black !important;
+}
+
+.PMColor{
+    display: flex !important;
+    justify-content: space-between;
+    flex-direction: row !important;
+}
+
+.PMPalette_hue{
+    width: 30px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.PMBrush_setting_holder{
+    width: 100%;
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+}
+
+.PMBrush_setting_title{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.PMBrush_setting_title input{
+    background-color: #2e2e2e;
+    border: solid 1px #3f3f3f;
+    border-radius: 3px;
+    width: 75px;
+    color: #d1d1d1;
+    font-size: 11px;
+    padding: 5px;
+}
+
+input[type=range] {
+    height: 3px;
+    -webkit-appearance: none;
+    margin: 10px 0;
+    width: 100%;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 3px;
+    cursor: pointer;
+    background: #5a5a5a;
+    border-radius: 0px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    border: 1px solid #444444;
+    height: 12px;
+    width: 12px;
+    border-radius: 3px;
+    background: #ffffff;
+    cursor: pointer;
+    -webkit-appearance: none;
+    clip-path: polygon(0 50%, 50% 0, 100% 50%, 100% 100%, 0% 100%);
+}
+
+.PMFooter span{
+    display: flex;
+    gap: 15px;
+}
+
+.PMRender__button{
+    border: unset !important;
+    background-color: #1473e6 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    padding: 5px !important;
+    border-radius: 50px !important;
+}
+
+.center.jsx-83c337f44c9d610{
+    position: absolute !important;
+    top: 0px !important;
+    left: 50% !important;
+    transform: translate(-50%, 0px) !important;
+    align-self: unset !important;
+    padding: 15px !important;
+    pointer-events: none;
+}
+
+.center.jsx-83c337f44c9d610 *{
+    font-family: Arial, Helvetica, sans-serif !important;
+    color: #d1d1d1 !important;
+    text-shadow: none !important;
+}
+
+.center.jsx-83c337f44c9d610 h4{
+    display: none;
+}
+
+.center.jsx-83c337f44c9d610 h3::before{
+    content: "Тема:";
+    color: #d1d1d1;
+    padding-right: 5px;
+}
+
+canvas {
+    touch-action: none !important;
+}
+
+.PMColor_save{
+    height: 25px;
+    width: 25px;
+    border: 1px solid black;
+    background-color: red;
+    box-shadow: inset 0px 0px 0px 1px rgb(255, 255, 255);
+}
+
+.PMColorPresets{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
