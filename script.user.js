@@ -42,11 +42,31 @@ let SETTINGS = {
     }
 }
 
+let TOOLS = {
+    BRUSH : 0,
+    ERASER : 1,
+    COLOR_PICKER : 2,
+    FILL : 3,
+    RECTANGLE : 4,
+    CIRCLE : 5,
+    FILLED_CIRCLE : 6,
+}
+
 let CURRENT_ROUND = -1
 let CURRENT_GAME_STATE = DEFAULT_GAME_STATE.MAIN_MENU
 
 //====================P0nya7noMOD====================\\
 //Основные функции
+
+
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
 
 //Подключение к открытому веб-сокету
 const originalSend = WebSocket.prototype.send;
@@ -147,7 +167,6 @@ function messageListener() {
     }
 }
 
-// Initialize the previous game state variable
 let previousGameState
 
 //====================P0nya7noMOD====================\\
@@ -161,7 +180,7 @@ class DrawingModule{
     foregroundColor = "#000000"
     backgroundColor = "#FF0000"
 
-    currentTool = 0
+    currentTool = TOOLS.BRUSH
 
     scale = 1
     drawWidth = "4"
@@ -178,6 +197,8 @@ class DrawingModule{
     undoAmount = 0
 
     canvasLocked = false
+
+    cursor = 1
 
     constructor(canvas, brushCanvas, proxyModule, width, height){
         this.canvas = canvas
@@ -211,20 +232,20 @@ class DrawingModule{
         const { drawingContainer } = this;
         const parentElement = drawingContainer.parentElement;
     
-        const startEvents = ["touchstart", "mousedown"];
+        const startEvents = ["touchstart", "pointerdown"];
         startEvents.forEach(eventType => {
             drawingContainer.addEventListener(eventType, event => this.dragStart(event));
             drawingContainer.addEventListener(eventType, event => this.startLine(event));
         });
     
-        const moveEvents = ["touchmove", "mousemove"];
+        const moveEvents = ["touchmove", "pointermove"];
         moveEvents.forEach(eventType => {
             document.addEventListener(eventType, event => this.dragCanvas(event));
             parentElement.addEventListener(eventType, event => this.drawLine(event));
             parentElement.addEventListener(eventType, event => this.renderCrosshair(event));
         });
     
-        const endEvents = ["touchend", "mouseup"];
+        const endEvents = ["touchend", "pointerup"];
         endEvents.forEach(eventType => {
             document.body.addEventListener(eventType, event => this.dragEnd(event));
             document.body.addEventListener(eventType, event => this.stopLine(event));
@@ -261,9 +282,10 @@ class DrawingModule{
     dragCanvas(event){
         if (this.isDragging) {
             console.log("dragCanvas");
-            if(event.which == 2){
-                this.drawingContainer.style.left = (event.clientX - this.shiftX) + "px"
-                this.drawingContainer.style.top = (event.clientY - this.shiftY) + "px"
+            console.log(event.which);
+            if(event.which == 0){
+                this.drawingContainer.style.left = (event.x - this.shiftX) + "px"
+                this.drawingContainer.style.top = (event.y - this.shiftY) + "px"
                 event.preventDefault()
                 event.stopImmediatePropagation()
             }
@@ -319,30 +341,57 @@ class DrawingModule{
 
     startLine(event){
         if (!this.canvasLocked) {
-            this.setDrawStyle()
-            this.snapshot = this.getModuleContext().getImageData(0, 0, 1516, 848)
             this.isDrawing = true
-            this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+            switch (this.currentTool) {
+                case TOOLS.BRUSH:
+                    this.setDrawStyle()
+                    this.snapshot = this.getModuleContext().getImageData(0, 0, 1516, 848)
+                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                    this.continiousPoints = ""
+
+                    this.continiousPoints += `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}],`
+
+                    this.canvasList[0].push({
+                        press : 1,
+                        color : this.drawColor,
+                        transparency : this.drawTransparency,
+                        pressNumber : this.strokeAmount,
+                        posArray : `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}]`,
+                        width : this.drawWidth,
+                        canvasContext : this.getModuleContext()
+                    })
+
+                    if (!SETTINGS.GLOBAL_LAYERS.state) {
+                        this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length-1])
+                    }
+                    break;
+            
+                case TOOLS.ERASER:
+                    this.setDrawStyle()
+                    this.snapshot = this.getModuleContext().getImageData(0, 0, 1516, 848)
+                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                    this.continiousPoints = ""
+
+                    this.continiousPoints += `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}],`
+
+                    this.canvasList[0].push({
+                        press : 1,
+                        color : this.drawColor,
+                        transparency : this.drawTransparency,
+                        pressNumber : this.strokeAmount,
+                        posArray : `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}]`,
+                        width : this.drawWidth,
+                        canvasContext : this.getModuleContext()
+                    })
+
+                    if (!SETTINGS.GLOBAL_LAYERS.state) {
+                        this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length-1])
+                    }
+                    break;
+            }
             
             this.drawLine(event)
 
-            this.continiousPoints = ""
-
-            this.continiousPoints += `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}],`
-
-            this.canvasList[0].push({
-                press : 1,
-                color : this.drawColor,
-                transparency : this.drawTransparency,
-                pressNumber : this.strokeAmount,
-                posArray : `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}]`,
-                width : this.drawWidth,
-                canvasContext : this.getModuleContext()
-            })
-
-            if (!SETTINGS.GLOBAL_LAYERS.state) {
-                this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length-1])
-            }
 
             event.preventDefault()
         }
@@ -350,27 +399,70 @@ class DrawingModule{
 
     drawLine(event) {
         if (this.isDrawing) {
-            this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
-            this.getModuleContext().clearRect(0, 0, this.width, this.height)
-            this.getModuleContext().putImageData(this.snapshot, 0, 0);
-            let p1 = this.points[0]
-            let p2 = this.points[1]
-            this.getModuleContext().beginPath()
-            this.getModuleContext().moveTo(p1.x, p1.y)
+            let p1, p2
+            switch (this.currentTool) {
+                case TOOLS.BRUSH:
+                    this.drawColor = this.foregroundColor
+                    this.setDrawStyle()
+                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                    this.getModuleContext().clearRect(0, 0, this.width, this.height)
+                    this.getModuleContext().putImageData(this.snapshot, 0, 0);
+                    p1 = this.points[0]
+                    p2 = this.points[1]
+                    this.getModuleContext().beginPath()
+                    this.getModuleContext().moveTo(p1.x, p1.y)
+        
+        
+                    for (let index = 1, len = this.points.length; index < len; index++) {
+                        let midPoint = this.midPointBtw(p1, p2)
+                        this.getModuleContext().quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y)
+                        p1 = this.points[index]
+                        p2 = this.points[index+1]
+                        
+                    }
+        
+                    this.getModuleContext().lineTo(p1.x, p1.y)
+                    this.getModuleContext().stroke()
+        
+                    this.continiousPoints += `[${p1.x/2}, ${p1.y/2}],`
+                    break;
+            
+                case TOOLS.ERASER:
+                    console.log("Take my number, and lock it in");
+                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                    this.getModuleContext().clearRect(0, 0, this.width, this.height)
+                    this.getModuleContext().putImageData(this.snapshot, 0, 0);
+                    p1 = this.points[0]
+                    p2 = this.points[1]
+                    this.getModuleContext().beginPath()
+                    this.getModuleContext().moveTo(p1.x, p1.y)
+        
+        
+                    for (let index = 1, len = this.points.length; index < len; index++) {
+                        let midPoint = this.midPointBtw(p1, p2)
+                        this.getModuleContext().quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y)
+                        p1 = this.points[index]
+                        p2 = this.points[index+1]
+                        
+                    }
+                    this.drawColor = "#FFFFFF"
+                    this.setDrawStyle()
+                    this.getModuleContext().lineTo(p1.x, p1.y)
+                    this.getModuleContext().stroke()
+        
+                    this.continiousPoints += `[${p1.x/2}, ${p1.y/2}],`
+                    break
 
-
-            for (let index = 1, len = this.points.length; index < len; index++) {
-                let midPoint = this.midPointBtw(p1, p2)
-                this.getModuleContext().quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y)
-                p1 = this.points[index]
-                p2 = this.points[index+1]
+                case TOOLS.COLOR_PICKER:
+                    this.drawColor = this.getColor()
+                    this.foregroundColor = this.getColor()
+                    document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.foregroundColor
+                    break
                 
+                case TOOLS.FILL:
+                    this.floodFill(event, this.canvasLayer)
+                    break
             }
-
-            this.getModuleContext().lineTo(p1.x, p1.y)
-            this.getModuleContext().stroke()
-
-            this.continiousPoints += `[${p1.x/2}, ${p1.y/2}],`
         }
         event.preventDefault()
     }
@@ -418,6 +510,26 @@ class DrawingModule{
         );
         brushContext.stroke();
 
+        if (this.drawWidth >= 20) {
+            brushContext.strokeStyle = "rgba(0, 0, 0, 0.5)";
+            brushContext.beginPath();
+            brushContext.arc(
+                this.getMouseCursor(event, this.brushCanvas).x,
+                this.getMouseCursor(event, this.brushCanvas).y,
+                0.5, 0, Math.PI * 2
+            );
+
+            brushContext.stroke();
+            brushContext.strokeStyle = "rgba(255, 255, 255, 0.5)";
+            brushContext.beginPath();
+            brushContext.arc(
+                this.getMouseCursor(event, this.brushCanvas).x,
+                this.getMouseCursor(event, this.brushCanvas).y,
+                1, 0, Math.PI * 2
+            );
+            brushContext.stroke();
+        }
+
         brushContext.strokeStyle = "#FFFFFF";
         brushContext.beginPath();
         brushContext.arc(
@@ -436,6 +548,44 @@ class DrawingModule{
             transparency : canvasLayer[cursor].transparency
         }
         return layer
+    }
+
+    floodFill(event, canvasLayer) {
+        let x = this.getMouseCursor(event, canvasLayer).x
+        let y = this.getMouseCursor(event, canvasLayer).y
+        const imageData = this.getModuleContext().getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const data = imageData.data;
+        const targetColor = this.foregroundColor
+        let targetColorStr
+        if (targetColor[0] == "#") {
+            targetColorStr = `rgba(${hexToRgb(targetColor).r}}, ${hexToRgb(targetColor).g}, ${hexToRgb(targetColor).b}, ${this.drawTransparency})`;
+        }else{
+            targetColorStr = `rgba(${targetColor.r}, ${targetColor.g}, ${targetColor.b}, ${this.drawTransparency})`;
+        }
+        
+        const stack = [{ x: x, y: y }];
+    
+        while (stack.length) {
+            const { x, y } = stack.pop();
+    
+            const index = (y * this.canvas.width + x) * 4;
+            if (data[index] !== targetColor.r || data[index + 1] !== targetColor.g ||
+                data[index + 2] !== targetColor.b || data[index + 3] !== this.drawTransparency) {
+                continue;
+            }
+    
+            data[index] = parseInt(fillColor.substring(1, 3), 16); // r
+            data[index + 1] = parseInt(fillColor.substring(3, 5), 16); // g
+            data[index + 2] = parseInt(fillColor.substring(5, 7), 16); // b
+            data[index + 3] = this.drawTransparency; // Полная непрозрачность
+    
+            stack.push({ x: x + 1, y: y });
+            stack.push({ x: x - 1, y: y });
+            stack.push({ x: x, y: y + 1 });
+            stack.push({ x: x, y: y - 1 });
+        }
+    
+        this.getModuleContext().putImageData(imageData, 0, 0);
     }
 
     refresh(layer){
@@ -485,7 +635,6 @@ class DrawingModule{
             1,
             1
         )['data']
-
         return `rgb(${pixel[0]},${pixel[1]},${pixel[2]})`
     }
     
@@ -975,11 +1124,48 @@ class ProxyModule{
     }
 }
 
+class ToolsModule{
+    currentTool = TOOLS.BRUSH
+
+    constructor(modificationModule, bindsContainer) {
+        this.modificationModule = modificationModule;
+        this.bindsContainer = bindsContainer;
+    }
+
+    init(){
+        this.addEventListeners()    
+    }
+
+    addEventListeners() {
+        document.querySelector(".PMPanel_tools").addEventListener("pointerdown", (event) => this.changeTool(event))
+    }
+
+    changeTool(event) {
+        event.stopPropagation();
+        if (event.target.closest(".PMTool")) {
+            this.currentTool = Array.from(event.currentTarget.children).indexOf(event.target.closest(".PMTool"))
+            CLASS_INSTANCES[2].currentTool = this.currentTool
+            Array.from(event.currentTarget.children).forEach((child) => {
+                child.classList.remove("PMTool__active");
+            })
+            event.target.closest(".PMTool").classList.add("PMTool__active");
+        }
+    }
+
+    setTool(tool){
+        Array.from(document.querySelector(".PMPanel_tools").children).forEach((child) => {
+            child.classList.remove("PMTool__active");
+        })
+        Array.from(document.querySelector(".PMPanel_tools").children)[tool].classList.add("PMTool__active");
+    }
+}
+
 class ModificationModule {
     constructor(drawingModule, bindsContainer) {
         this.drawingModule = drawingModule;
         this.bindsContainer = bindsContainer;
         this.keysPressed = {};
+        this.currentTool = TOOLS.BRUSH;
         this.keypress = this.keypress.bind(this)
         this.keyup = this.keyup.bind(this)
     }
@@ -1009,10 +1195,13 @@ class ModificationModule {
         switch (event.code) {
             case this.bindsContainer.BRUSH_KEY:
                 this.drawingModule.drawColor = this.drawingModule.foregroundColor;
+                this.drawingModule.currentTool = TOOLS.BRUSH;
+                CLASS_INSTANCES[5].setTool(TOOLS.BRUSH);
                 break;
 
             case this.bindsContainer.ERASER_KEY:
-                this.drawingModule.drawColor = "#ffffff";
+                this.drawingModule.currentTool = TOOLS.ERASER;
+                CLASS_INSTANCES[5].setTool(TOOLS.ERASER);
                 break;
 
             case this.bindsContainer.CHANGE_KEY:
@@ -1023,6 +1212,7 @@ class ModificationModule {
                 this.drawingModule.drawColor = this.drawingModule.getColor()
                 this.drawingModule.foregroundColor = this.drawingModule.getColor()
                 document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.drawingModule.foregroundColor
+                event.preventDefault();
                 break
 
             case this.bindsContainer.MIRROR_KEY:
@@ -1166,6 +1356,13 @@ const MODULES_ONLOAD = [
         selectors : [],
         settings : [BINDS],
         dependingOn : 2,
+    },
+    {
+        name : ToolsModule,
+        stateRequired : DEFAULT_GAME_STATE.DRAWING,
+        selectors : [],
+        settings : [BINDS],
+        dependingOn : 4,
     },
     {
         name : BrushModule,
