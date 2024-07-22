@@ -241,15 +241,15 @@ class DrawingModule{
     
         const moveEvents = ["touchmove", "pointermove"];
         moveEvents.forEach(eventType => {
-            document.addEventListener(eventType, event => this.dragCanvas(event));
+            document.querySelector(".screen").addEventListener(eventType, event => this.dragCanvas(event));
             parentElement.addEventListener(eventType, event => this.drawLine(event));
             parentElement.addEventListener(eventType, event => this.renderCrosshair(event));
         });
     
         const endEvents = ["touchend", "pointerup"];
         endEvents.forEach(eventType => {
-            document.body.addEventListener(eventType, event => this.dragEnd(event));
-            document.body.addEventListener(eventType, event => this.stopLine(event));
+            document.querySelector(".screen").addEventListener(eventType, event => this.dragEnd(event));
+            document.querySelector(".screen").addEventListener(eventType, event => this.stopLine(event));
         });
 
         drawingContainer.addEventListener("wheel", event => this.zoom(event))
@@ -293,6 +293,7 @@ class DrawingModule{
 
     dragEnd(event){
         if(event.which == 2){
+            console.log(event.which, this, "dragEnd");
             this.isDragging = false
             event.preventDefault()
             event.stopImmediatePropagation()
