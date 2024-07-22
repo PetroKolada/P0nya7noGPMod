@@ -596,3 +596,13 @@ canvas {
     flex-direction: row;
     flex-wrap: wrap;
 }
+
+.PMInfo_panel{
+    position: fixed;
+    bottom: 50px;
+    left: 50px;
+    background-color: #191919;
+    border: 3px solid #1d1d1d;
+    display: flex;
+    flex-direction: column;
+}

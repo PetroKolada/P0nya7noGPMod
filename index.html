@@ -31,7 +31,6 @@
                         <div class="PMTool"><svg xmlns="http://www.w3.org/2000/svg" id="Bold" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Zm0,21a9,9,0,1,1,9-9A9.01,9.01,0,0,1,12,21Z"/></svg></div>
                         <div class="PMTool"><svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="512" height="512"><path d="M12,0A12,12,0,1,0,24,12,12.013,12.013,0,0,0,12,0Z"/></svg></div>
                     </div>
-                    <div class="draw"></div>
                 </div>
                 <div class="PMFooter">
                     <span>
@@ -49,7 +48,7 @@
                     <div class="PMPanel_main_holder">
                         <div class="PMPanel_hero PMColor">
                             <div class="PMFast_color_holder">
-                                <div class="PMFast__color"></div>
+                                <div class="PMFast__color">+</div>
                                 <div class="PMFast__color"></div>
                             </div>
                             <canvas class="PMPalette"></canvas>
@@ -63,10 +62,12 @@
                     </div>
                     <div class="PMPanel_main_holder">
                         <div class="PMPanel_hero PMColorPresets">
-                            <div class="PMColor_save"></div>
-                            <div class="PMColor_save"></div>
-                            <div class="PMColor_save"></div>
-                            <div class="PMColor_save"></div>
+                            <div class="PMColor_save" style="background-color: rgb(0, 0, 0)"></div>
+                            <div class="PMColor_save" style="background-color: rgb(255, 255, 255)"></div>
+                            <div class="PMColor_save" style="background-color: rgb(255, 0, 0)"></div>
+                            <div class="PMColor_save" style="background-color: rgb(0, 255, 0)"></div>
+                            <div class="PMColor_save" style="background-color: rgb(0, 0, 255)"></div>
+
                         </div>
                     </div>
                 </div>
@@ -76,20 +77,36 @@
                         <div class="PMPTitle">Пресеты</div>
                     </div>
                     <div class="PMPanel_main_holder">
-                        <div class="PMPanel_hero">
+                        <div class="PMPanel_hero" id="brushSettingsHolder">
                             <div class="PMBrush_setting_holder">
                                 <div class="PMBrush_setting_title">
                                     Размер:
-                                    <input type="value">
+                                    <input type="value" id="brushRadiusInput" min="1" value="4">
                                 </div>
-                                <input type="range" value="0">
+                                <input type="range" id="brushRadiusValue" min="1" value="4">
                             </div>
                             <div class="PMBrush_setting_holder">
                                 <div class="PMBrush_setting_title">
                                     Непрозрачность:
-                                    <input type="value">
+                                    <input type="value" id="brushTransparencyInput" min="1" value="100">
                                 </div>
-                                <input type="range" value="0" min="1">
+                                <input type="range" id="brushTransparencyValue" min="1" value="100">
+                            </div>
+                        </div>
+                        <div class="PMPanel_hero PMPanel_hero__active" id="brushSettingsHolder">
+                            <div class="PMBrush_setting_holder">
+                                <div class="PMBrush_setting_title">
+                                    Размер:
+                                    <input type="value" id="brushRadiusInput" min="1" value="4">
+                                </div>
+                                <input type="range" id="brushRadiusValue" min="1" value="4">
+                            </div>
+                            <div class="PMBrush_setting_holder">
+                                <div class="PMBrush_setting_title">
+                                    Непрозрачность:
+                                    <input type="value" id="brushTransparencyInput" min="1" value="100">
+                                </div>
+                                <input type="range" id="brushTransparencyValue" min="1" value="100">
                             </div>
                         </div>
                     </div>
@@ -171,5 +188,12 @@
 
         })
     </script>
+
+    <div class="PMInfo_panel">
+        <span class="PMInfo__title"></span>
+        <span class="PMInfo__text"></span>
+        <div class="PMInfo__timer"></div>
+    </div>
+
 </body>
 </html>

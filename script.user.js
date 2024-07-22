@@ -212,6 +212,7 @@ class DrawingModule{
     }
 
     init(){
+        this.isDragging = false
         this.setModuleContext()
         this.canvasList = [[]]
         this.points = []
@@ -281,8 +282,6 @@ class DrawingModule{
 
     dragCanvas(event){
         if (this.isDragging) {
-            console.log("dragCanvas");
-            console.log(event.which);
             if(event.which == 0){
                 this.drawingContainer.style.left = (event.x - this.shiftX) + "px"
                 this.drawingContainer.style.top = (event.y - this.shiftY) + "px"
@@ -428,7 +427,6 @@ class DrawingModule{
                     break;
             
                 case TOOLS.ERASER:
-                    console.log("Take my number, and lock it in");
                     this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
                     this.getModuleContext().clearRect(0, 0, this.width, this.height)
                     this.getModuleContext().putImageData(this.snapshot, 0, 0);
@@ -476,23 +474,47 @@ class DrawingModule{
             */
             this.isDrawing = false
             this.points.length = 0
+            switch (this.currentTool) {
+                case TOOLS.BRUSH:
+                    this.canvasList[0].push({
+                        press : 3,
+                        color : this.drawColor,
+                        transparency : this.drawTransparency,
+                        pressNumber : this.strokeAmount,
+                        posArray : this.continiousPoints.slice(0, -1),
+                        width : this.drawWidth,
+                        canvasContext : this.getModuleContext()
+                    })
+        
+                    if (!SETTINGS.GLOBAL_LAYERS.state) {
+                        this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length - 1])
+                    }
+                    this.strokeAmount++;
+                    this.undoAmount = this.strokeAmount
+                    break;
+            
+                case TOOLS.ERASER:
+                    this.canvasList[0].push({
+                        press : 3,
+                        color : this.drawColor,
+                        transparency : this.drawTransparency,
+                        pressNumber : this.strokeAmount,
+                        posArray : this.continiousPoints.slice(0, -1),
+                        width : this.drawWidth,
+                        canvasContext : this.getModuleContext()
+                    })
+        
+                    if (!SETTINGS.GLOBAL_LAYERS.state) {
+                        this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length - 1])
+                    }
+                    this.strokeAmount++;
+                    this.undoAmount = this.strokeAmount
+                    break;
+                
+                case TOOLS.FILL:
 
-            this.canvasList[0].push({
-                press : 3,
-                color : this.drawColor,
-                transparency : this.drawTransparency,
-                pressNumber : this.strokeAmount,
-                posArray : this.continiousPoints.slice(0, -1),
-                width : this.drawWidth,
-                canvasContext : this.getModuleContext()
-            })
-
-            if (!SETTINGS.GLOBAL_LAYERS.state) {
-                console.log(this.canvasList[0][this.strokeAmount]);
-                this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length - 1])
+                    break
             }
-            this.strokeAmount++;
-            this.undoAmount = this.strokeAmount
 
         }
         event.preventDefault()
@@ -671,7 +693,6 @@ class HudModule{
     }
 
     sendCanvas(){
-        console.log(CLASS_INSTANCES);
         this.proxyModule.sendCanvas(CLASS_INSTANCES[2].canvasList[0])
     }
 
@@ -1424,7 +1445,6 @@ async function modificationInitialization(MODULES_ONLOAD) {
                 }
             }
 
-            console.log(MODULES_ONLOAD);
             instance.init();
 
             // Сохраняем экземпляр в классах
