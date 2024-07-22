@@ -200,8 +200,8 @@ button{
     height: 424px !important;
     width: 758px !important;
     position: fixed !important;
-    top: 25%;
-    left: 25%;
+    left: 25vw;
+    top: 25vh;
     transform-origin: 0 0;
 }
 
@@ -550,6 +550,12 @@ input[type=range]::-webkit-slider-thumb {
     font-size: 12px !important;
     padding: 5px !important;
     border-radius: 50px !important;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.PMRender__button:hover{
+    background-color: orange !important;
 }
 
 .center.jsx-83c337f44c9d610{
@@ -605,4 +611,15 @@ canvas {
     border: 3px solid #1d1d1d;
     display: flex;
     flex-direction: column;
+}
+
+.PMReady__overlay{
+    z-index: 1;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
 }

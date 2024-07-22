@@ -39,6 +39,11 @@ let SETTINGS = {
         name : "Глобальные слои",
         description : "Глобальные слои - слои которые переносятся в игру (Требуют рендер - (600 линий в минуту))",
         state : false,
+    },
+    PALETTE_UPDATE : {
+        name : "Обновление палитры",
+        description : "Обновление палитры - ререндер палитры после изменения цвета",
+        state : true,
     }
 }
 
@@ -123,34 +128,37 @@ function messageListener() {
                 console.log("message parse error: ", event);
             }
 
-            if (message != "3"){
-                switch (message[1]) {
-                    case 24:
-                        CURRENT_GAME_STATE = DEFAULT_GAME_STATE.WATCHING;
-                        break;
-                    case 5:
-                        CURRENT_GAME_STATE = DEFAULT_GAME_STATE.LOBBY;
-                        CURRENT_ROUND = -1
-                        break;
-                }
-
-                if (message[1] == 11) {
-                    switch (message[2].screen) {
-                        case 3:
-                            CURRENT_GAME_STATE = DEFAULT_GAME_STATE.WRITING;
-                            console.log("ROUND: ", CURRENT_ROUND);
-                            break;
-                        case 4:
+            try
+            {
+                if (message != "3"){
+                    switch (message[1]) {
+                        case 24:
                             CURRENT_GAME_STATE = DEFAULT_GAME_STATE.WATCHING;
-                            console.log("ROUND: ", CURRENT_ROUND);
                             break;
                         case 5:
-                            CURRENT_GAME_STATE = DEFAULT_GAME_STATE.DRAWING;
-                            console.log("ROUND: ", CURRENT_ROUND);
+                            CURRENT_GAME_STATE = DEFAULT_GAME_STATE.LOBBY;
+                            CURRENT_ROUND = -1
                             break;
+                }
+
+                    if (message[1] == 11) {
+                        switch (message[2].screen) {
+                            case 3:
+                                CURRENT_GAME_STATE = DEFAULT_GAME_STATE.WRITING;
+                                console.log("ROUND: ", CURRENT_ROUND);
+                                break;
+                            case 4:
+                                CURRENT_GAME_STATE = DEFAULT_GAME_STATE.WATCHING;
+                                console.log("ROUND: ", CURRENT_ROUND);
+                                break;
+                            case 5:
+                                CURRENT_GAME_STATE = DEFAULT_GAME_STATE.DRAWING;
+                                console.log("ROUND: ", CURRENT_ROUND);
+                                break;
+                        }
                     }
                 }
-            }
+            }catch (error) {}
 
             // Call the function only when the game state changes
             if (CURRENT_GAME_STATE != previousGameState) {
@@ -182,7 +190,7 @@ class DrawingModule{
 
     currentTool = TOOLS.BRUSH
 
-    scale = 1
+    scale = window.innerWidth / 1920
     drawWidth = "4"
     drawTransparency = "1"
     isDrawing = false
@@ -212,6 +220,7 @@ class DrawingModule{
     }
 
     init(){
+        this.drawingContainer.style.scale = this.scale
         this.isDragging = false
         this.setModuleContext()
         this.canvasList = [[]]
@@ -456,6 +465,7 @@ class DrawingModule{
                     this.drawColor = this.getColor()
                     this.foregroundColor = this.getColor()
                     document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.foregroundColor
+                    CLASS_INSTANCES[3].refreshPalette()
                     break
                 
                 case TOOLS.FILL:
@@ -522,45 +532,70 @@ class DrawingModule{
     }
 
     renderCrosshair(event){
-        let brushContext = this.brushCanvas.getContext("2d")
-        brushContext.clearRect(0, 0, this.brushCanvas.width, this.brushCanvas.height);
-        brushContext.strokeStyle = "#000000";
-        brushContext.beginPath();
-        brushContext.arc(
-            this.getMouseCursor(event, this.brushCanvas).x,
-            this.getMouseCursor(event, this.brushCanvas).y,
-            this.drawWidth/2, 0, Math.PI * 2
-        );
-        brushContext.stroke();
+        let brushContext
+        switch (this.currentTool) {
+            case TOOLS.COLOR_PICKER:
+                brushContext = this.brushCanvas.getContext("2d")
+                brushContext.clearRect(0, 0, this.brushCanvas.width, this.brushCanvas.height);
+                brushContext.strokeStyle = "#000000";
+                brushContext.beginPath();
+                brushContext.moveTo(this.getMouseCursor(event, this.brushCanvas).x - 5, this.getMouseCursor(event, this.brushCanvas).y)
+                brushContext.lineTo(this.getMouseCursor(event, this.brushCanvas).x + 5, this.getMouseCursor(event, this.brushCanvas).y)
+                brushContext.moveTo(this.getMouseCursor(event, this.brushCanvas).x, this.getMouseCursor(event, this.brushCanvas).y - 5)
+                brushContext.lineTo(this.getMouseCursor(event, this.brushCanvas).x, this.getMouseCursor(event, this.brushCanvas).y + 5)
+                brushContext.stroke();
 
-        if (this.drawWidth >= 20) {
-            brushContext.strokeStyle = "rgba(0, 0, 0, 0.5)";
-            brushContext.beginPath();
-            brushContext.arc(
-                this.getMouseCursor(event, this.brushCanvas).x,
-                this.getMouseCursor(event, this.brushCanvas).y,
-                0.5, 0, Math.PI * 2
-            );
+                brushContext.strokeStyle = "#FFFFFF";
+                brushContext.beginPath();
+                brushContext.moveTo(this.getMouseCursor(event, this.brushCanvas).x - 5, this.getMouseCursor(event, this.brushCanvas).y+1)
+                brushContext.lineTo(this.getMouseCursor(event, this.brushCanvas).x + 5, this.getMouseCursor(event, this.brushCanvas).y+1)
+                brushContext.moveTo(this.getMouseCursor(event, this.brushCanvas).x, this.getMouseCursor(event, this.brushCanvas).y - 5+1)
+                brushContext.lineTo(this.getMouseCursor(event, this.brushCanvas).x, this.getMouseCursor(event, this.brushCanvas).y + 5+1)
+                brushContext.stroke();
+                break;
+        
+            default:
+                brushContext = this.brushCanvas.getContext("2d")
+                brushContext.clearRect(0, 0, this.brushCanvas.width, this.brushCanvas.height);
+                brushContext.strokeStyle = "#000000";
+                brushContext.beginPath();
+                brushContext.arc(
+                    this.getMouseCursor(event, this.brushCanvas).x,
+                    this.getMouseCursor(event, this.brushCanvas).y,
+                    this.drawWidth/2, 0, Math.PI * 2
+                );
+                brushContext.stroke();
 
-            brushContext.stroke();
-            brushContext.strokeStyle = "rgba(255, 255, 255, 0.5)";
-            brushContext.beginPath();
-            brushContext.arc(
-                this.getMouseCursor(event, this.brushCanvas).x,
-                this.getMouseCursor(event, this.brushCanvas).y,
-                1, 0, Math.PI * 2
-            );
-            brushContext.stroke();
+                if (this.drawWidth >= 20) {
+                    brushContext.strokeStyle = "rgba(0, 0, 0, 0.5)";
+                    brushContext.beginPath();
+                    brushContext.arc(
+                        this.getMouseCursor(event, this.brushCanvas).x,
+                        this.getMouseCursor(event, this.brushCanvas).y,
+                        0.5, 0, Math.PI * 2
+                    );
+
+                    brushContext.stroke();
+                    brushContext.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                    brushContext.beginPath();
+                    brushContext.arc(
+                        this.getMouseCursor(event, this.brushCanvas).x,
+                        this.getMouseCursor(event, this.brushCanvas).y,
+                        1, 0, Math.PI * 2
+                    );
+                    brushContext.stroke();
+                }
+
+                brushContext.strokeStyle = "#FFFFFF";
+                brushContext.beginPath();
+                brushContext.arc(
+                    this.getMouseCursor(event, this.brushCanvas).x,
+                    this.getMouseCursor(event, this.brushCanvas).y,
+                    this.drawWidth/2+1, 0, Math.PI * 2
+                );
+                brushContext.stroke();
+                break;
         }
-
-        brushContext.strokeStyle = "#FFFFFF";
-        brushContext.beginPath();
-        brushContext.arc(
-            this.getMouseCursor(event, this.brushCanvas).x,
-            this.getMouseCursor(event, this.brushCanvas).y,
-            this.drawWidth/2+1, 0, Math.PI * 2
-        );
-        brushContext.stroke();
     }
 
     listToLayer(canvasLayer, cursor){
@@ -694,6 +729,7 @@ class HudModule{
     }
 
     sendCanvas(){
+        document.querySelector(".PMReady__overlay").style.display = "block"
         this.proxyModule.sendCanvas(CLASS_INSTANCES[2].canvasList[0])
     }
 
@@ -704,7 +740,8 @@ class HudModule{
                     <div class="PMHeader_links">
                         <div class="PMHeader_element">P0nya7noGP</div>
                         <div class="PMHeader_element">Настройки</div>
-                        <div class="PMHeader_element">Референсы</div>
+                        <div class="PMHeader_element">Окна</div>
+                        <div class="PMHeader_element">Фильтры</div>
                     </div>
                     <div class="PMHeader_links">
                         <div class="PMHeader_element">14/13</div>
@@ -712,6 +749,7 @@ class HudModule{
                     </div>
                 </div>
                 <div class="PMPanel_inside">
+                    <div class="PMReady__overlay"></div>
                     <div class="PMPanel_tools">
                         <div class="PMTool PMTool__active"><svg id="Layer_1" height="512" viewBox="0 0 24 24" width="512" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1"><path d="m.024 23.976.076-1.05c.076-1.1.545-6.688 2.307-8.451a5.036 5.036 0 0 1 7.118 7.125c-1.762 1.762-7.349 2.23-8.452 2.306zm23.076-23.108a3.137 3.137 0 0 0 -4.333 0l-10.515 10.519a6.967 6.967 0 0 1 4.342 4.324l10.506-10.511a3.067 3.067 0 0 0 0-4.332z"/></svg></div>
                         <div class="PMTool"><svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="512" height="512"><path d="m7.242,7.438L12.751,1.911c1.17-1.175,3.213-1.175,4.383,0l5.935,5.955c1.206,1.21,1.206,3.179,0,4.389l-5.506,5.525L7.242,7.438Zm7.111,13.562l1.798-1.804L5.83,8.855.882,13.82c-1.206,1.21-1.206,3.179,0,4.389l4.774,4.791h18.344v-2h-9.647Z"/></svg></div>
@@ -727,7 +765,7 @@ class HudModule{
                         <div class="PMFooter_element">ZOOM: 100%</div>
                         <div class="PMFooter_element">1516px. X 848px. (300ppi)</div>
                     </span>
-                    <button class="PMRender__button">Экспортировать</button>
+                    <button class="PMRender__button">Готово.</button>
                 </div>
             </div>
             <div class="PMRight_panel">
@@ -771,14 +809,14 @@ class HudModule{
                             <div class="PMBrush_setting_holder">
                                 <div class="PMBrush_setting_title">
                                     Размер:
-                                    <input type="value" id="brushRadiusInput" min="1" value="4">
+                                    <input type="value" id="brushRadiusInput" min="1" value="4 пикс.">
                                 </div>
                                 <input type="range" id="brushRadiusValue" min="1" value="4">
                             </div>
                             <div class="PMBrush_setting_holder">
                                 <div class="PMBrush_setting_title">
                                     Непрозрачность:
-                                    <input type="value" id="brushTransparencyInput" min="1" value="100">
+                                    <input type="value" id="brushTransparencyInput" min="1" value="100%">
                                 </div>
                                 <input type="range" id="brushTransparencyValue" min="1" value="100">
                             </div>
@@ -821,7 +859,7 @@ class HudModule{
 class PaletteModule{
     color = "#ff0000"
     colorSelecting = false
-    savedColors = ""
+    saveColors = []
 
     constructor(paletteElement, drawingModule){
         this.paletteElement = paletteElement
@@ -851,8 +889,7 @@ class PaletteModule{
         this.getModuleContext().canvas.width = 252
         document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.drawingModule.foregroundColor
         document.querySelectorAll(".PMFast__color")[1].style.backgroundColor = this.drawingModule.backgroundColor
-        this.savedColors = localStorage.getItem("savedColors")?.toString().split("|").slice(0,-1)
-        this.savedColors == undefined ? this.savedColors = []:
+        this.savedColors = localStorage.getItem("savedColors").split(',') || []
         this.savedColors.forEach(color => {
             document.querySelector(".PMColorPresets").innerHTML += `<div class="PMColor_save" style="background-color: ${color}"></div>`
         })
@@ -878,6 +915,13 @@ class PaletteModule{
         this.getModuleContext().canvas.height); 
     }
 
+    refreshPalette(){
+        if (SETTINGS.PALETTE_UPDATE) {
+            this.color = this.drawingModule.foregroundColor
+            this.renderPalette(this.drawingModule.foregroundColor)
+        }
+    }
+
     setMouseEventsPalette(){
         this.paletteElement.addEventListener("touchstart", event => this.startPaletteColor(event))
         this.paletteElement.addEventListener("touchmove", event => this.setColor(event))
@@ -893,7 +937,8 @@ class PaletteModule{
     saveColor(event){
         if (event.target.classList.contains("PMFast__color")) {
             document.querySelector(".PMColorPresets").innerHTML += `<div class="PMColor_save" style="background-color: ${event.target.style.backgroundColor}"></div>`
-            this.savedColors += (event.target.style.backgroundColor)+"|"
+            let rgb = (r, g, b) => '#' + (1<<24|r<<16|g<<8|b).toString(16).slice(1)
+            this.savedColors.push(eval(event.target.style.backgroundColor))
             localStorage.setItem('savedColors', this.savedColors)
         }
         event.preventDefault
@@ -906,6 +951,7 @@ class PaletteModule{
                 document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = event.target.style.backgroundColor
                 this.drawingModule.foregroundColor = event.target.style.backgroundColor
                 this.drawingModule.drawColor = event.target.style.backgroundColor
+                this.refreshPalette()
                 break;
         
             case 2:
@@ -1234,6 +1280,7 @@ class ModificationModule {
                 this.drawingModule.drawColor = this.drawingModule.getColor()
                 this.drawingModule.foregroundColor = this.drawingModule.getColor()
                 document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.drawingModule.foregroundColor
+                CLASS_INSTANCES[3].refreshPalette()
                 event.preventDefault();
                 break
 
