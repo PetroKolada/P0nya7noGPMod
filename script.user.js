@@ -712,15 +712,17 @@ class HudModule{
     }
 
     resetDefault(){
-        let draw = document.querySelector(".jsx-267435985")
-        document.querySelector(".jsx-83c337f44c9d610").innerHTML += draw.outerHTML
-        document.querySelector(".core").remove()
-        document.querySelector(".jsx-470877037").remove()
-        document.querySelector(".bottom").remove()
-        document.querySelector(".download").remove()
-        document.querySelector(".sound").remove()
-        this.hudElement.querySelector(".colors").remove()?[]:[]
-        this.hudElement.querySelector(".tools").remove()?[]:[]
+        try {
+            let draw = document.querySelector(".jsx-267435985")
+            document.querySelector(".jsx-83c337f44c9d610").innerHTML += draw.outerHTML
+            document.querySelector(".core").remove()
+            document.querySelector(".jsx-470877037").remove()
+            document.querySelector(".bottom").remove()
+            document.querySelector(".download").remove()
+            document.querySelector(".sound").remove()
+            this.hudElement.querySelector(".colors").remove()
+            this.hudElement.querySelector(".tools").remove()
+        } catch (error) {}
         //this.hudElement.querySelector(".options").remove()?[]:[]
     }
 
