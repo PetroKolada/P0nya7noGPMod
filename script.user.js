@@ -899,7 +899,7 @@ class PaletteModule{
         this.getModuleContext().canvas.width = 252
         document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.drawingModule.foregroundColor
         document.querySelectorAll(".PMFast__color")[1].style.backgroundColor = this.drawingModule.backgroundColor
-        this.savedColors = localStorage.getItem("savedColors").split(',') || []
+        localStorage.getItem("savedColors") != undefined ? this.savedColors = localStorage.getItem("savedColors").split(',') : this.savedColors = []
         this.savedColors.forEach(color => {
             document.querySelector(".PMColorPresets").innerHTML += `<div class="PMColor_save" style="background-color: ${color}"></div>`
         })
