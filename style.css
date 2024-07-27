@@ -202,7 +202,7 @@ button{
     position: fixed !important;
     left: 25vw;
     top: 25vh;
-    transform-origin: 0 0;
+    transform-origin: 50% 50%;
 }
 
 .bottom{

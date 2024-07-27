@@ -57,6 +57,7 @@ let TOOLS = {
     FILLED_CIRCLE : 6,
 }
 
+
 let CURRENT_ROUND = -1
 let CURRENT_GAME_STATE = DEFAULT_GAME_STATE.MAIN_MENU
 
@@ -78,8 +79,8 @@ const originalSend = WebSocket.prototype.send;
 WebSocket.prototype.send = function(...args) {
     if (window.sockets.indexOf(this) === -1){
         window.sockets.push(this);
+        messageListener()
     }
-    messageListener()
     return originalSend.call(this, ...args);
 };
 
@@ -119,7 +120,7 @@ findElement(".side").then((element)=>{element.remove()})
 
 function messageListener() {
     if (window.sockets && window.sockets[0]) {
-        window.sockets[0].addEventListener("message", (event) => {
+        window.sockets[window.sockets.length-1].addEventListener("message", (event) => {
             let message;
             console.log(message, "current game state: ", CURRENT_GAME_STATE);
             try {
@@ -161,14 +162,15 @@ function messageListener() {
             }catch (error) {}
 
             // Call the function only when the game state changes
-            if (CURRENT_GAME_STATE != previousGameState) {
-                modificationInitialization(MODULES_ONLOAD);
-                previousGameState = CURRENT_GAME_STATE;
-                if (CURRENT_GAME_STATE == DEFAULT_GAME_STATE.DRAWING || CURRENT_GAME_STATE == DEFAULT_GAME_STATE.WRITING || CURRENT_GAME_STATE == DEFAULT_GAME_STATE.WATCHING) {
-                    CURRENT_ROUND++
+            try {
+                if (CURRENT_GAME_STATE != previousGameState) {
+                    modificationInitialization(MODULES_ONLOAD);
+                    previousGameState = CURRENT_GAME_STATE;
+                    if (CURRENT_GAME_STATE == DEFAULT_GAME_STATE.DRAWING || CURRENT_GAME_STATE == DEFAULT_GAME_STATE.WRITING || CURRENT_GAME_STATE == DEFAULT_GAME_STATE.WATCHING) {
+                        CURRENT_ROUND++
+                    }
                 }
-            }
-
+            } catch (error) {}
         });
     } else {
         console.error("No sockets available in window.sockets");
@@ -270,6 +272,7 @@ class DrawingModule{
         this.scale += event.deltaY * ZOOM_SENS * -1
         this.scale = Math.min(Math.max(0.125, this.scale), 4);
         this.drawingContainer.style.scale = this.scale
+        document.querySelectorAll(".PMFooter_element")[0].textContent = `ZOOM: ${Math.floor(this.scale*100)}%`
     }
 
     startX
@@ -282,8 +285,9 @@ class DrawingModule{
             console.log("dragStart");
             this.isDragging = true
             const rect = this.drawingContainer.getBoundingClientRect();
-            this.shiftX = (event.clientX - rect.left)
-            this.shiftY = (event.clientY - rect.top)
+            this.shiftX = ((this.drawingContainer.offsetWidth - (rect.right - rect.left)) / 2) + (event.clientX - rect.left)
+            this.shiftY = ((this.drawingContainer.offsetHeight - (rect.bottom - rect.top)) / 2) + (event.clientY - rect.top)
+            console.log(this.shiftX);
             event.preventDefault()
             event.stopImmediatePropagation()
         }
@@ -292,8 +296,9 @@ class DrawingModule{
     dragCanvas(event){
         if (this.isDragging) {
             if(event.which == 0){
-                this.drawingContainer.style.left = (event.x - this.shiftX) + "px"
-                this.drawingContainer.style.top = (event.y - this.shiftY) + "px"
+                console.log((event.clientX - this.shiftX));
+                this.drawingContainer.style.left = ((event.clientX - this.shiftX)) + "px" //(event.x - this.shiftX) + "px"
+                this.drawingContainer.style.top = ((event.clientY - this.shiftY)) + "px"//(event.y - this.shiftY) + "px"
                 event.preventDefault()
                 event.stopImmediatePropagation()
             }
@@ -302,7 +307,6 @@ class DrawingModule{
 
     dragEnd(event){
         if(event.which == 2){
-            console.log(event.which, this, "dragEnd");
             this.isDragging = false
             event.preventDefault()
             event.stopImmediatePropagation()
@@ -682,8 +686,9 @@ class DrawingModule{
 
     mirrorCanvas(){
         this.isMirrored == false ? this.isMirrored = true : this.isMirrored = false
-        this.isMirrored == true? this.drawingContainer.style.transformOrigin = `50% 0`: this.drawingContainer.style.transformOrigin = `0 0`
+        this.isMirrored == true? this.drawingContainer.style.transformOrigin = `50% 50%`: this.drawingContainer.style.transformOrigin = `50% 50%`
         this.drawingContainer.style.transform = "scaleX("+this.getMirrorPhase()+")"
+        document.querySelectorAll(".PMFooter_element")[1].textContent = this.isMirrored? "MIRRORED: TRUE" : "MIRRORED: false"
     }
 
     getColor(){
@@ -765,6 +770,7 @@ class HudModule{
                 <div class="PMFooter">
                     <span>
                         <div class="PMFooter_element">ZOOM: 100%</div>
+                        <div class="PMFooter_element">MIRRORED: false</div>
                         <div class="PMFooter_element">1516px. X 848px. (300ppi)</div>
                     </span>
                     <button class="PMRender__button">Готово.</button>
@@ -1384,6 +1390,18 @@ class BrushModule{
         this.brushSettingsElement.querySelector("#brushTransparencyValue").value = value
         this.brushSettingsElement.querySelector("#brushTransparencyInput").value = value + "%"
     }
+}
+
+class Panel{
+    constructor(panelBuilder, panelPosition){
+        this.panelBuilder = panelBuilder
+        this.panelPosition = panelPosition
+    }
+
+    buildPanel(panelBuilder, panelPosition){
+
+    }
+
 }
 
 //====================P0nya7noMOD====================\\
