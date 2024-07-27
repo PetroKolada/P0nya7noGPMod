@@ -1,4 +1,13 @@
-console.log("P0nya7no mod launched successfuly.");
+//Подключение к открытому веб-сокету
+const originalSend = WebSocket.prototype.send;
+WebSocket.prototype.send = function(...args) {
+    if (window.sockets.indexOf(this) === -1){
+        window.sockets.push(this);
+        messageListener()
+    }
+    return originalSend.call(this, ...args);
+};
+
 
 //====================P0nya7noMOD====================\\
 //Определение переменных
@@ -73,16 +82,6 @@ function hexToRgb(hex) {
         b: parseInt(result[3], 16)
     } : null;
 }
-
-//Подключение к открытому веб-сокету
-const originalSend = WebSocket.prototype.send;
-WebSocket.prototype.send = function(...args) {
-    if (window.sockets.indexOf(this) === -1){
-        window.sockets.push(this);
-        messageListener()
-    }
-    return originalSend.call(this, ...args);
-};
 
 //Функция трансформации слоя позиций в массив
 function stringToArray(str) {
@@ -1520,3 +1519,5 @@ async function modificationInitialization(MODULES_ONLOAD) {
         }
     }
 }
+
+console.log("P0nya7no mod launched successfuly.",this);
