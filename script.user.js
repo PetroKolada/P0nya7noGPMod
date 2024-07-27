@@ -1,4 +1,5 @@
 //Подключение к открытому веб-сокету
+
 const originalSend = WebSocket.prototype.send;
 WebSocket.prototype.send = function(...args) {
     if (window.sockets.indexOf(this) === -1){
@@ -112,8 +113,9 @@ function findElement(selector) {
 }
 
 //Удаление рекламы
-findElement(".side").then((element)=>{element.remove()})
-
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector(".side").remove()
+})
 //====================P0nya7noMOD====================\\
 //Создание слушателя для сообщений
 
