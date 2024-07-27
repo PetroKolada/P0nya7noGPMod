@@ -115,6 +115,7 @@ function findElement(selector) {
 //Удаление рекламы
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelector(".side").remove()
+    console.log("Ad removed");
 })
 //====================P0nya7noMOD====================\\
 //Создание слушателя для сообщений
