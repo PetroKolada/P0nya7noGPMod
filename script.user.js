@@ -67,9 +67,11 @@ let TOOLS = {
     FILLED_CIRCLE : 6,
 }
 
+let GLOBAL_KEYS = {}
 
 let CURRENT_ROUND = -1
 let CURRENT_GAME_STATE = DEFAULT_GAME_STATE.MAIN_MENU
+let SCALE_WEIGHT = 2
 
 //====================P0nya7noMOD====================\\
 //Основные функции
@@ -214,6 +216,8 @@ class DrawingModule{
 
     cursor = 1
 
+    isScaling
+
     constructor(canvas, brushCanvas, proxyModule, width, height){
         this.canvas = canvas
         this.brushCanvas = brushCanvas
@@ -353,55 +357,62 @@ class DrawingModule{
         };
     }
 
+    firstPos = {x:0, y:0}
     startLine(event){
         if (!this.canvasLocked) {
-            this.isDrawing = true
-            switch (this.currentTool) {
-                case TOOLS.BRUSH:
-                    this.setDrawStyle()
-                    this.snapshot = this.getModuleContext().getImageData(0, 0, 1516, 848)
-                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
-                    this.continiousPoints = ""
+            if (GLOBAL_KEYS["ShiftLeft"] == undefined) {
+                this.isDrawing = true
+                switch (this.currentTool) {
+                    case TOOLS.BRUSH:
+                        this.setDrawStyle()
+                        this.snapshot = this.getModuleContext().getImageData(0, 0, 1516, 848)
+                        this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                        this.continiousPoints = ""
 
-                    this.continiousPoints += `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}],`
+                        this.continiousPoints += `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}],`
 
-                    this.canvasList[0].push({
-                        press : 1,
-                        color : this.drawColor,
-                        transparency : this.drawTransparency,
-                        pressNumber : this.strokeAmount,
-                        posArray : `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}]`,
-                        width : this.drawWidth,
-                        canvasContext : this.getModuleContext()
-                    })
+                        this.canvasList[0].push({
+                            press : 1,
+                            color : this.drawColor,
+                            transparency : this.drawTransparency,
+                            pressNumber : this.strokeAmount,
+                            posArray : `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}]`,
+                            width : this.drawWidth,
+                            canvasContext : this.getModuleContext()
+                        })
 
-                    if (!SETTINGS.GLOBAL_LAYERS.state) {
-                        this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length-1])
-                    }
-                    break;
-            
-                case TOOLS.ERASER:
-                    this.setDrawStyle()
-                    this.snapshot = this.getModuleContext().getImageData(0, 0, 1516, 848)
-                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
-                    this.continiousPoints = ""
+                        if (!SETTINGS.GLOBAL_LAYERS.state) {
+                            this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length-1])
+                        }
+                        break;
+                
+                    case TOOLS.ERASER:
+                        this.setDrawStyle()
+                        this.snapshot = this.getModuleContext().getImageData(0, 0, 1516, 848)
+                        this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                        this.continiousPoints = ""
 
-                    this.continiousPoints += `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}],`
+                        this.continiousPoints += `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}],`
 
-                    this.canvasList[0].push({
-                        press : 1,
-                        color : this.drawColor,
-                        transparency : this.drawTransparency,
-                        pressNumber : this.strokeAmount,
-                        posArray : `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}]`,
-                        width : this.drawWidth,
-                        canvasContext : this.getModuleContext()
-                    })
+                        this.canvasList[0].push({
+                            press : 1,
+                            color : this.drawColor,
+                            transparency : this.drawTransparency,
+                            pressNumber : this.strokeAmount,
+                            posArray : `[${(this.getMouseCursor(event, this.drawingContainer.parentElement).x)/2},${(this.getMouseCursor(event, this.drawingContainer.parentElement).y)/2}]`,
+                            width : this.drawWidth,
+                            canvasContext : this.getModuleContext()
+                        })
 
-                    if (!SETTINGS.GLOBAL_LAYERS.state) {
-                        this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length-1])
-                    }
-                    break;
+                        if (!SETTINGS.GLOBAL_LAYERS.state) {
+                            this.proxyModule.sendStroke(this.canvasList[0][this.canvasList[0].length-1])
+                        }
+                        break;
+                }
+            }else{
+                this.isScaling = true
+                this.firstPos = this.getMouseCursor(event, this.drawingContainer.parentElement)
+                this.renderCrosshair(event)
             }
             
             this.drawLine(event)
@@ -412,70 +423,81 @@ class DrawingModule{
     }
 
     drawLine(event) {
-        if (this.isDrawing) {
-            let p1, p2
-            switch (this.currentTool) {
-                case TOOLS.BRUSH:
-                    this.drawColor = this.foregroundColor
-                    this.setDrawStyle()
-                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
-                    this.getModuleContext().clearRect(0, 0, this.width, this.height)
-                    this.getModuleContext().putImageData(this.snapshot, 0, 0);
-                    p1 = this.points[0]
-                    p2 = this.points[1]
-                    this.getModuleContext().beginPath()
-                    this.getModuleContext().moveTo(p1.x, p1.y)
-        
-        
-                    for (let index = 1, len = this.points.length; index < len; index++) {
-                        let midPoint = this.midPointBtw(p1, p2)
-                        this.getModuleContext().quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y)
-                        p1 = this.points[index]
-                        p2 = this.points[index+1]
-                        
-                    }
-        
-                    this.getModuleContext().lineTo(p1.x, p1.y)
-                    this.getModuleContext().stroke()
-        
-                    this.continiousPoints += `[${p1.x/2}, ${p1.y/2}],`
-                    break;
+        if (GLOBAL_KEYS["ShiftLeft"] == undefined) {
+            if (this.isDrawing) {
+                let p1, p2
+                switch (this.currentTool) {
+                    case TOOLS.BRUSH:
+                        this.drawColor = this.foregroundColor
+                        this.setDrawStyle()
+                        this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                        this.getModuleContext().clearRect(0, 0, this.width, this.height)
+                        this.getModuleContext().putImageData(this.snapshot, 0, 0);
+                        p1 = this.points[0]
+                        p2 = this.points[1]
+                        this.getModuleContext().beginPath()
+                        this.getModuleContext().moveTo(p1.x, p1.y)
             
-                case TOOLS.ERASER:
-                    this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
-                    this.getModuleContext().clearRect(0, 0, this.width, this.height)
-                    this.getModuleContext().putImageData(this.snapshot, 0, 0);
-                    p1 = this.points[0]
-                    p2 = this.points[1]
-                    this.getModuleContext().beginPath()
-                    this.getModuleContext().moveTo(p1.x, p1.y)
-        
-        
-                    for (let index = 1, len = this.points.length; index < len; index++) {
-                        let midPoint = this.midPointBtw(p1, p2)
-                        this.getModuleContext().quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y)
-                        p1 = this.points[index]
-                        p2 = this.points[index+1]
-                        
-                    }
-                    this.drawColor = "#FFFFFF"
-                    this.setDrawStyle()
-                    this.getModuleContext().lineTo(p1.x, p1.y)
-                    this.getModuleContext().stroke()
-        
-                    this.continiousPoints += `[${p1.x/2}, ${p1.y/2}],`
-                    break
-
-                case TOOLS.COLOR_PICKER:
-                    this.drawColor = this.getColor()
-                    this.foregroundColor = this.getColor()
-                    document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.foregroundColor
-                    CLASS_INSTANCES[3].refreshPalette()
-                    break
+            
+                        for (let index = 1, len = this.points.length; index < len; index++) {
+                            let midPoint = this.midPointBtw(p1, p2)
+                            this.getModuleContext().quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y)
+                            p1 = this.points[index]
+                            p2 = this.points[index+1]
+                            
+                        }
+            
+                        this.getModuleContext().lineTo(p1.x, p1.y)
+                        this.getModuleContext().stroke()
+            
+                        this.continiousPoints += `[${p1.x/2}, ${p1.y/2}],`
+                        break;
                 
-                case TOOLS.FILL:
-                    this.floodFill(event, this.canvasLayer)
-                    break
+                    case TOOLS.ERASER:
+                        this.points.push({x:this.getMouseCursor(event, this.drawingContainer.parentElement).x, y:this.getMouseCursor(event, this.drawingContainer.parentElement).y})
+                        this.getModuleContext().clearRect(0, 0, this.width, this.height)
+                        this.getModuleContext().putImageData(this.snapshot, 0, 0);
+                        p1 = this.points[0]
+                        p2 = this.points[1]
+                        this.getModuleContext().beginPath()
+                        this.getModuleContext().moveTo(p1.x, p1.y)
+            
+            
+                        for (let index = 1, len = this.points.length; index < len; index++) {
+                            let midPoint = this.midPointBtw(p1, p2)
+                            this.getModuleContext().quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y)
+                            p1 = this.points[index]
+                            p2 = this.points[index+1]
+                            
+                        }
+                        this.drawColor = "#FFFFFF"
+                        this.setDrawStyle()
+                        this.getModuleContext().lineTo(p1.x, p1.y)
+                        this.getModuleContext().stroke()
+            
+                        this.continiousPoints += `[${p1.x/2}, ${p1.y/2}],`
+                        break
+    
+                    case TOOLS.COLOR_PICKER:
+                        this.drawColor = this.getColor()
+                        this.foregroundColor = this.getColor()
+                        document.querySelectorAll(".PMFast__color")[0].style.backgroundColor = this.foregroundColor
+                        CLASS_INSTANCES[3].refreshPalette()
+                        break
+                    
+                    case TOOLS.FILL:
+                        this.floodFill(event, this.canvasLayer)
+                        break
+                }
+            }
+        }else{
+            if (this.isScaling) {
+                this.drawWidth = Math.round(Math.sqrt(
+                    Math.pow((this.firstPos.x - this.getMouseCursor(event).x), 2) + Math.pow((this.firstPos.y - this.getMouseCursor(event).y), 2)
+                )/SCALE_WEIGHT + 1)
+                this.renderCrosshair(event)
+                document.querySelector("#brushRadiusValue").value = this.drawWidth
+                document.querySelector("#brushRadiusInput").value = this.drawWidth + " пикс."
             }
         }
         event.preventDefault()
@@ -531,7 +553,10 @@ class DrawingModule{
 
                     break
             }
+        }
 
+        if (this.isScaling) {
+            this.isScaling = false
         }
         event.preventDefault()
     }
@@ -1262,12 +1287,14 @@ class ModificationModule {
 
     keypress(event){
         this.keysPressed[event.code] = true;
+        GLOBAL_KEYS = this.keysPressed;
         this.undoHandler(event);
         this.handleKeydown(event);
     }
 
     keyup(event){
         delete this.keysPressed[event.code];
+        GLOBAL_KEYS = this.keysPressed;
     }
 
     handleKeydown(event) {
