@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //Создание слушателя для сообщений
 
 function messageListener() {
-    if (window.sockets && window.sockets[0]) {
+    if (window.sockets) {
         window.sockets[window.sockets.length-1].addEventListener("message", (event) => {
             let message;
             console.log(message, "current game state: ", CURRENT_GAME_STATE);
@@ -168,6 +168,7 @@ function messageListener() {
                 if (CURRENT_GAME_STATE != previousGameState) {
                     modificationInitialization(MODULES_ONLOAD);
                     previousGameState = CURRENT_GAME_STATE;
+                    previousRound = CURRENT_ROUND
                     if (CURRENT_GAME_STATE == DEFAULT_GAME_STATE.DRAWING || CURRENT_GAME_STATE == DEFAULT_GAME_STATE.WRITING || CURRENT_GAME_STATE == DEFAULT_GAME_STATE.WATCHING) {
                         CURRENT_ROUND++
                     }
@@ -180,6 +181,7 @@ function messageListener() {
 }
 
 let previousGameState
+let previousRound
 
 //====================P0nya7noMOD====================\\
 //Определение классов
@@ -284,12 +286,10 @@ class DrawingModule{
 
     dragStart(event){
         if(event.which == 2){
-            console.log("dragStart");
             this.isDragging = true
             const rect = this.drawingContainer.getBoundingClientRect();
             this.shiftX = ((this.drawingContainer.offsetWidth - (rect.right - rect.left)) / 2) + (event.clientX - rect.left)
             this.shiftY = ((this.drawingContainer.offsetHeight - (rect.bottom - rect.top)) / 2) + (event.clientY - rect.top)
-            console.log(this.shiftX);
             event.preventDefault()
             event.stopImmediatePropagation()
         }
@@ -298,7 +298,6 @@ class DrawingModule{
     dragCanvas(event){
         if (this.isDragging) {
             if(event.which == 0){
-                console.log((event.clientX - this.shiftX));
                 this.drawingContainer.style.left = ((event.clientX - this.shiftX)) + "px" //(event.x - this.shiftX) + "px"
                 this.drawingContainer.style.top = ((event.clientY - this.shiftY)) + "px"//(event.y - this.shiftY) + "px"
                 event.preventDefault()
@@ -740,6 +739,7 @@ class HudModule{
     sendCanvas(){
         document.querySelector(".PMReady__overlay").style.display = "block"
         this.proxyModule.sendCanvas(CLASS_INSTANCES[2].canvasList[0])
+        console.log(window.sockets);
     }
 
     renderHud(){
@@ -1132,7 +1132,8 @@ class LayersModule{
 
 class ProxyModule{
     constructor(WebSocket){
-        this.webSocket = WebSocket[WebSocket.length-1];
+        this.webSocket = window.sockets
+        console.log(this.webSocket);
     }
 
     componentToHex(c) {
@@ -1172,9 +1173,9 @@ class ProxyModule{
                     counter++
                     if (counter % 15 == 0) {
                         await this.delay(1500);
-                        this.webSocket.send(this.strokeCombine(options)); 
+                        this.webSocket[window.sockets.length - 1].send(this.strokeCombine(options)); 
                     }else{
-                        this.webSocket.send(this.strokeCombine(options)); 
+                        this.webSocket[window.sockets.length - 1].send(this.strokeCombine(options)); 
                     }
                 }
             }
@@ -1186,11 +1187,11 @@ class ProxyModule{
     }
 
     sendStroke(stroke){
-        this.webSocket.send(this.strokeCombine(stroke));
+        this.webSocket[window.sockets.length - 1].send(this.strokeCombine(stroke));
     }
     
     undo(options){
-        this.webSocket.send(`42[2, 7, {"t": ${CURRENT_ROUND}, "d": 2, "v": ${options.strokeAmount}}]`)
+        this.webSocket[window.sockets.length - 1].send(`42[2, 7, {"t": ${CURRENT_ROUND}, "d": 2, "v": ${options.strokeAmount}}]`)
     }
 
     delay(ms) {
@@ -1198,7 +1199,7 @@ class ProxyModule{
     }
 
     finishRound(){
-        this.webSocket.send("42[2,15,true]")
+        this.webSocket[window.sockets.length - 1].send("42[2,15,true]")
     }
 }
 
@@ -1484,7 +1485,7 @@ async function modificationInitialization(MODULES_ONLOAD) {
 
             if (dependings != undefined && elements.length > 0) {
                 if (classModule.useSocket) {
-                    instance = new classModule.name(...elements, dependings, sockets,...classModule.settings);
+                    instance = new classModule.name(...elements, dependings, window.sockets,...classModule.settings);
                 } else {
                     instance = new classModule.name(...elements, dependings, ...classModule.settings);
                 }
@@ -1492,7 +1493,7 @@ async function modificationInitialization(MODULES_ONLOAD) {
 
             if (elements.length === 0 && dependings == undefined) {
                 if (classModule.useSocket) {
-                    instance = new classModule.name(sockets, ...classModule.settings,);
+                    instance = new classModule.name(window.sockets, ...classModule.settings,);
                 }
                 else {
                     instance = new classModule.name(...classModule.settings);
@@ -1501,7 +1502,7 @@ async function modificationInitialization(MODULES_ONLOAD) {
 
             if (elements.length > 0 && dependings == undefined) {
                 if (classModule.useSocket) {
-                    instance = new classModule.name(...elements, sockets, ...classModule.settings);
+                    instance = new classModule.name(...elements, window.sockets, ...classModule.settings);
                 }else {
                     instance = new classModule.name(...elements, ...classModule.settings);
                 }
@@ -1509,7 +1510,7 @@ async function modificationInitialization(MODULES_ONLOAD) {
 
             if (elements.length === 0 && dependings != undefined) {
                 if (classModule.useSocket) {
-                    instance = new classModule.name(dependings, sockets, ...classModule.settings);
+                    instance = new classModule.name(dependings, window.sockets, ...classModule.settings);
                 } else {
                     instance = new classModule.name(dependings, ...classModule.settings);
                 }
