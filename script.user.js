@@ -703,10 +703,12 @@ class DrawingModule{
     }
     
     undoHandler(){
-        if (!SETTINGS.GLOBAL_LAYERS.state) {
-            this.proxyModule.undo({
-                strokeAmount : this.undoAmount,
-            })
+        if (this.isDragging == false) {
+            if (!SETTINGS.GLOBAL_LAYERS.state) {
+                this.proxyModule.undo({
+                    strokeAmount : this.undoAmount,
+                })
+            }
         }
     }
 }
@@ -1326,35 +1328,37 @@ class ModificationModule {
     }
 
     undoHandler(event) {
-        if (SETTINGS.GLOBAL_LAYERS.state) {
-            if (this.keysPressed["ControlLeft"] && event.code === 'KeyZ') {
-                const { drawingModule } = this;
-                const { strokeAmount, canvasList} = drawingModule;
-                console.log("undo", this);
-                if (strokeAmount > 0) {
-                    canvasList[0].pop();
-                    canvasList[0].pop();
-                    drawingModule.strokeAmount--;
-    
-                    this.drawingModule.refresh(canvasList[0]);
-    
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
+        if (this.drawingModule.isDrawing == false) {
+            if (SETTINGS.GLOBAL_LAYERS.state) {
+                if (this.keysPressed["ControlLeft"] && event.code === 'KeyZ') {
+                    const { drawingModule } = this;
+                    const { strokeAmount, canvasList} = drawingModule;
+                    console.log("undo", this);
+                    if (strokeAmount > 0) {
+                        canvasList[0].pop();
+                        canvasList[0].pop();
+                        drawingModule.strokeAmount--;
+        
+                        this.drawingModule.refresh(canvasList[0]);
+        
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                    }
                 }
-            }
-        }else{
-            if (this.keysPressed["ControlLeft"] && event.code === 'KeyZ') {
-                const { drawingModule } = this;
-                const { strokeAmount, canvasList} = drawingModule;
-                console.log("undo", this);
-                if (drawingModule.undoAmount > 0) {
-                    canvasList[0].pop();
-                    canvasList[0].pop();
-                    drawingModule.undoAmount--
-                    this.drawingModule.refresh(canvasList[0]);
-                    drawingModule.undoHandler()
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
+            }else{
+                if (this.keysPressed["ControlLeft"] && event.code === 'KeyZ') {
+                    const { drawingModule } = this;
+                    const { strokeAmount, canvasList} = drawingModule;
+                    console.log("undo", this);
+                    if (drawingModule.undoAmount > 0) {
+                        canvasList[0].pop();
+                        canvasList[0].pop();
+                        drawingModule.undoAmount--
+                        this.drawingModule.refresh(canvasList[0]);
+                        drawingModule.undoHandler()
+                        event.preventDefault();
+                        event.stopImmediatePropagation();
+                    }
                 }
             }
         }
