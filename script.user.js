@@ -71,7 +71,7 @@ let GLOBAL_KEYS = {}
 
 let CURRENT_ROUND = -1
 let CURRENT_GAME_STATE = DEFAULT_GAME_STATE.MAIN_MENU
-let SCALE_WEIGHT = 2
+let SCALE_WEIGHT = 5
 
 //====================P0nya7noMOD====================\\
 //Основные функции
@@ -358,9 +358,20 @@ class DrawingModule{
     }
 
     firstPos = {x:0, y:0}
+    preWidth = 0
     startLine(event){
         if (!this.canvasLocked) {
-            if (GLOBAL_KEYS["ShiftLeft"] == undefined) {
+            if (GLOBAL_KEYS["ShiftLeft"] == true && GLOBAL_KEYS["ControlLeft"] == undefined){
+                this.isScaling = true
+                this.firstPos = this.getMouseCursor(event, this.drawingContainer.parentElement)
+                this.preWidth = this.drawWidth
+                this.renderCrosshair(event)
+            }
+            else if (GLOBAL_KEYS["ShiftLeft"] == true && GLOBAL_KEYS["ControlLeft"] == true) {
+                this.isScaling = true
+                this.firstPos = this.getMouseCursor(event, this.drawingContainer.parentElement)
+                this.preTransparency = this.drawTransparency
+            }else{
                 this.isDrawing = true
                 switch (this.currentTool) {
                     case TOOLS.BRUSH:
@@ -409,10 +420,6 @@ class DrawingModule{
                         }
                         break;
                 }
-            }else{
-                this.isScaling = true
-                this.firstPos = this.getMouseCursor(event, this.drawingContainer.parentElement)
-                this.renderCrosshair(event)
             }
             
             this.drawLine(event)
@@ -421,9 +428,28 @@ class DrawingModule{
             event.preventDefault()
         }
     }
-
     drawLine(event) {
-        if (GLOBAL_KEYS["ShiftLeft"] == undefined) {
+        if(GLOBAL_KEYS["ShiftLeft"] == true && GLOBAL_KEYS["ControlLeft"] == undefined) {
+            if (this.isScaling) {
+                //this.drawWidth = Math.round(Math.sqrt(
+                //    Math.pow((this.firstPos.x - this.getMouseCursor(event).x), 2) + Math.pow((this.firstPos.y - this.getMouseCursor(event).y), 2)
+                //)/SCALE_WEIGHT + 1)
+                let scale = Math.round((this.getMouseCursor(event).x - this.firstPos.x)/SCALE_WEIGHT)
+                this.drawWidth = Math.max(+this.preWidth + scale, 1)
+                this.renderCrosshair(event)
+                document.querySelector("#brushRadiusValue").value = this.drawWidth
+                document.querySelector("#brushRadiusInput").value = this.drawWidth + " пикс."
+            }
+        }
+        else if(GLOBAL_KEYS["ShiftLeft"] == true && GLOBAL_KEYS["ControlLeft"] == true) {
+            if (this.isScaling) {
+                let scale = Math.round((this.getMouseCursor(event).x - this.firstPos.x)/SCALE_WEIGHT)
+                this.drawTransparency = Math.round(Math.min(Math.max(+this.preTransparency*100 + scale, 1), 100))/100
+                this.renderCrosshair(event)
+                document.querySelector("#brushTransparencyValue").value = Math.round(this.drawTransparency*100)
+                document.querySelector("#brushTransparencyInput").value = Math.round(this.drawTransparency*100) + "%"
+            }
+        }else{
             if (this.isDrawing) {
                 let p1, p2
                 switch (this.currentTool) {
@@ -489,15 +515,6 @@ class DrawingModule{
                         this.floodFill(event, this.canvasLayer)
                         break
                 }
-            }
-        }else{
-            if (this.isScaling) {
-                this.drawWidth = Math.round(Math.sqrt(
-                    Math.pow((this.firstPos.x - this.getMouseCursor(event).x), 2) + Math.pow((this.firstPos.y - this.getMouseCursor(event).y), 2)
-                )/SCALE_WEIGHT + 1)
-                this.renderCrosshair(event)
-                document.querySelector("#brushRadiusValue").value = this.drawWidth
-                document.querySelector("#brushRadiusInput").value = this.drawWidth + " пикс."
             }
         }
         event.preventDefault()
@@ -775,6 +792,7 @@ class HudModule{
                 <div class="PMHeader">
                     <div class="PMHeader_links">
                         <div class="PMHeader_element">P0nya7noGP</div>
+                        <div class="PMHeader_element"><a href="https://discord.gg/XH5jeyD3hg" target=”_blank”>Дискорд сервер</a></div>
                         <div class="PMHeader_element">Настройки</div>
                         <div class="PMHeader_element">Окна</div>
                         <div class="PMHeader_element">Фильтры</div>
@@ -1355,7 +1373,7 @@ class ModificationModule {
     }
 
     undoHandler(event) {
-        if (this.drawingModule.isDrawing == false) {
+        if (this.drawingModule.isDrawing == false || this.drawingModule.isScaling == false) {
             if (SETTINGS.GLOBAL_LAYERS.state) {
                 if (this.keysPressed["ControlLeft"] && event.code === 'KeyZ') {
                     const { drawingModule } = this;

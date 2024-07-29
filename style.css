@@ -623,3 +623,9 @@ canvas {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
 }
+
+a{
+    text-decoration: none;
+    text-align: center;
+    color: #d1d1d1 !important;
+}
