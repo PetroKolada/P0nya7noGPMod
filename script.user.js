@@ -129,8 +129,9 @@ function messageListener() {
             console.log(message, "current game state: ", CURRENT_GAME_STATE);
             try {
                 message = JSON.parse(event.data.slice(2).toString());
+                console.log("message: ", message);
             } catch {
-                console.log("message parse error: ", event);
+                console.log("message parse error: ", JSON.parse(event.data.slice(2).toString()));
             }
 
             try
@@ -1148,33 +1149,6 @@ class HueModule extends PaletteModule{
     }
 }
 
-class LayersModule{
-    layers = [[]]
-    currentLayer = 0
-    strokeAmount = 0
-
-    constructor(canvasLayerElement, layerListElement){
-        this.canvasLayerElement = canvasLayerElement
-        this.layerListElement = layerListElement
-    }
-
-    addNewLayer(){
-        this.layers.push([])
-    }
-
-    removeLayer(index){
-        this.layers[index].splice(index, 1)
-    }
-
-    moveLayer(oldPos, newPos){
-        this.layers.splice(newPos, 0, this.layers.splice(oldPos, 1)[0]);
-    }
-
-    renderLayers(){
-
-    }
-}
-
 class ProxyModule{
     constructor(WebSocket){
         this.webSocket = window.sockets
@@ -1373,7 +1347,7 @@ class ModificationModule {
     }
 
     undoHandler(event) {
-        if (this.drawingModule.isDrawing == false || this.drawingModule.isScaling == false) {
+        if (this.drawingModule.isDrawing == false && this.drawingModule.isScaling == false) {
             if (SETTINGS.GLOBAL_LAYERS.state) {
                 if (this.keysPressed["ControlLeft"] && event.code === 'KeyZ') {
                     const { drawingModule } = this;
