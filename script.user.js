@@ -217,7 +217,7 @@ class DrawingModule{
 
     cursor = 1
 
-    isScaling
+    isScaling = false
 
     constructor(canvas, brushCanvas, proxyModule, width, height){
         this.canvas = canvas
