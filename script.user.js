@@ -793,7 +793,7 @@ class HudModule{
                 <div class="PMHeader">
                     <div class="PMHeader_links">
                         <div class="PMHeader_element">P0nya7noGP</div>
-                        <div class="PMHeader_element"><a href="https://discord.gg/XH5jeyD3hg" target=”_blank”>Дискорд сервер</a></div>
+                        <div class="PMHeader_element discord_server"><a href="https://discord.gg/XH5jeyD3hg" target=”_blank”>discord.gg/XH5jeyD3hg</a></div>
                         <div class="PMHeader_element">Настройки</div>
                         <div class="PMHeader_element">Окна</div>
                         <div class="PMHeader_element">Фильтры</div>
@@ -1418,17 +1418,6 @@ class BrushModule{
     }
 }
 
-class Panel{
-    constructor(panelBuilder, panelPosition){
-        this.panelBuilder = panelBuilder
-        this.panelPosition = panelPosition
-    }
-
-    buildPanel(panelBuilder, panelPosition){
-
-    }
-
-}
 
 //====================P0nya7noMOD====================\\
 //Создание основного инициализатора

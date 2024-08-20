@@ -629,3 +629,9 @@ a{
     text-align: center;
     color: #d1d1d1 !important;
 }
+
+.discord_server a{
+    color: #b3b3e9 !important;
+    font-family: monospace;
+    font-weight: bold;
+}
